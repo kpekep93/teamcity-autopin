@@ -27,6 +27,20 @@
     </td>
   </tr>
   <tr>
+    <th>Unpin previous pinned build</th>
+    <td>
+      <props:checkboxProperty name="unpin_previous" uncheckedValue="false"/>
+      <span class="smallNote">If checked, previous pinned build from current build configuration will be unpinned</span>
+    </td>
+  </tr>
+  <tr>
+    <th>Unpin all other pinned builds</th>
+    <td>
+      <props:checkboxProperty name="unpin_others" uncheckedValue="false"/>
+      <span class="smallNote">If checked, all other pinned builds from current build configuration will be unpinned</span>
+    </td>
+  </tr>
+  <tr>
     <th>Comment</th>
     <td>
       <props:textProperty name="comment"/>

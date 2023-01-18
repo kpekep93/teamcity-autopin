@@ -22,7 +22,8 @@ public class AutoPinBuildFeature extends BuildFeature {
     public static final String PARAM_COMMENT = "comment";
     public static final String PARAM_TAG = "tag";
     public static final String PARAM_PIN_DEPENDENCIES = "pin_dependencies";
-
+    public static final String PARAM_UNPIN_PREVIOUS = "unpin_previous";
+    public static final String PARAM_UNPIN_OTHERS = "unpin_others";
 
     private final String myEditUrl;
 
@@ -71,6 +72,12 @@ public class AutoPinBuildFeature extends BuildFeature {
         if (StringUtils.isTrue(getParameterWithDefaults(params, PARAM_PIN_DEPENDENCIES)))
             sb.append(" and all its dependencies");
 
+        if (StringUtils.isTrue(getParameterWithDefaults(params, PARAM_UNPIN_PREVIOUS)))
+            sb.append(" and unpin previous pinned");
+        
+        if (StringUtils.isTrue(getParameterWithDefaults(params, PARAM_UNPIN_OTHERS)))
+            sb.append(" and unpin others pinned");
+
         if (!getParameterWithDefaults(params, PARAM_BRANCH_PATTERN).isEmpty())
             sb.append(" if branch matches \"" + getParameterWithDefaults(params, PARAM_BRANCH_PATTERN) + "\"");
 
@@ -115,6 +122,8 @@ public class AutoPinBuildFeature extends BuildFeature {
         map.put(PARAM_COMMENT, "Pinned automatically");
         map.put(PARAM_TAG, "");
         map.put(PARAM_PIN_DEPENDENCIES, "true");
+        map.put(PARAM_UNPIN_PREVIOUS, "false");
+        map.put(PARAM_UNPIN_OTHERS, "false");
         return map;
     }
 }

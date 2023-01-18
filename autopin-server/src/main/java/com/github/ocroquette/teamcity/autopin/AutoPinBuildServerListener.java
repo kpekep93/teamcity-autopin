@@ -60,17 +60,43 @@ public class AutoPinBuildServerListener extends BuildServerAdapter {
                         buildHistory.findEntry(bp.getAssociatedBuild().getBuildId()).setPinned(true, triggeringUser, comment);
                     }
                 }
+
+                // If checked, unpin previous build
+                if (StringUtils.isTrue(bfd.getParameters().get(AutoPinBuildFeature.PARAM_UNPIN_PREVIOUS))){
+                    SFinishedBuild previousPinnedBuild = getPreviousPinned(finishedBuild);
+                    
+                    // Unpin previous pinned build from current build configuration
+                    if (previousPinnedBuild != null && previousPinnedBuild.getBuildTypeId() == finishedBuild.getBuildTypeId()){
+                        previousPinnedBuild.setPinned(false, triggeringUser, comment);
+                    }
+                }
+
+                // If checked, unpin other pinned builds
+                if (StringUtils.isTrue(bfd.getParameters().get(AutoPinBuildFeature.PARAM_UNPIN_OTHERS))) {
+                    SFinishedBuild previousPinnedBuild = getPreviousPinned(finishedBuild);
+                    
+                    while (previousPinnedBuild != null){
+                        // Unpin previous pinned build from current build configuration
+                        if (previousPinnedBuild.getBuildTypeId() == finishedBuild.getBuildTypeId()){
+                            previousPinnedBuild.setPinned(false, triggeringUser, comment);
+                        }
+
+                        // And get previous pinned build
+                        previousPinnedBuild = getPreviousPinned(previousPinnedBuild);
+                    }
+                }
+
                 String tag = bfd.getParameters().get(AutoPinBuildFeature.PARAM_TAG);
 
                 if (StringUtils.isSet(tag)) {
-                        BuildTagHelper.addTag(finishedBuild, tag);
+                    BuildTagHelper.addTag(finishedBuild, tag);
 
-                        if (StringUtils.isTrue(bfd.getParameters().get(AutoPinBuildFeature.PARAM_PIN_DEPENDENCIES))) {
-                            for (BuildPromotion bp : finishedBuild.getBuildPromotion().getAllDependencies()) {
-                                BuildTagHelper.addTag(buildHistory.findEntry(bp.getAssociatedBuild().getBuildId()), tag);
-                            }
+                    if (StringUtils.isTrue(bfd.getParameters().get(AutoPinBuildFeature.PARAM_PIN_DEPENDENCIES))) {
+                        for (BuildPromotion bp : finishedBuild.getBuildPromotion().getAllDependencies()) {
+                            BuildTagHelper.addTag(buildHistory.findEntry(bp.getAssociatedBuild().getBuildId()), tag);
                         }
                     }
+                }
             }
         }
     }
@@ -93,5 +119,19 @@ public class AutoPinBuildServerListener extends BuildServerAdapter {
         }
 
         return matching;
+    }
+
+    private SFinishedBuild getPreviousPinned(SFinishedBuild finishedBuild){
+        // Get previous build
+        SFinishedBuild previousPinnedBuild = finishedBuild.getPreviousFinished();
+        
+        // If this build is not pinned
+        if (previousPinnedBuild != null && !previousPinnedBuild.isPinned()){
+            // Get previous build
+            previousPinnedBuild = getPreviousPinned(previousPinnedBuild);
+        }
+
+        // Return previous pinned build
+        return previousPinnedBuild;
     }
 }
